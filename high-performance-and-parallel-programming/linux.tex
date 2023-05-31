@@ -1,0 +1,69 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+
+\title{Password-less SSH and \\ Using Visual Studio Code with the Linux servers}
+\author{Oskar Tegby}
+\date{7 February 2022}
+
+\begin{document}
+\maketitle
+
+\section{Part 1 - Using SSH and SCP without entering your password}
+This approach will work on MacOS and Linux based systems. This might work with Windows Subsystem for Linux
+(WSL), however, we haven't tested this yet. Finally, please refer to manuals online if you are using
+\href{https://devops.ionos.com/tutorials/use-ssh-keys-with-putty-on-windows/}{PuTTY}, or
+\href{https://ubccr.freshdesk.com/support/solutions/articles/13000034093-using-ssh-keys-with-mobaxterm-windows-}{MobaXterm}.
+
+\begin{enumerate}
+\item Open Terminal.
+\item Enter: \texttt{ssh-keygen -b 3072 -N "" -t rsa}
+\item Enter: \texttt{ssh-copy-id <username>@<domain>.uu.se}\footnote{replace \texttt{<username>} with your Linux username and \texttt{<domain>} with the desired server domain name.}
+\end{enumerate}
+
+Step 2 will create a public and private key in the default directory \texttt{\$HOME/.ssh/} with the
+filenames \texttt{id\_rsa.pub} and \texttt{id\_rsa}. Be sure to keep the private key (\texttt{id\_rsa})
+private - never share it to anyone else. The public key \texttt{id\_rsa.pub} is safe to share
+around. Furthermore, in this command we are creating a public/private key pair using the RSA
+algorithm with 3072 bits. 
+
+\textbf{Advanced: }For this purpose we are setting the password to empty password. This is
+convenient because users don't need to type in any password. However, for security purposes it is
+considered safe to encrypt the key with a password. If you do want to encrypt your private key, you
+can remove the \texttt{-N ""} option. If you have password-protected private keys, you can use
+\texttt{ssh-agent} to cache your decrypted private key for the lifetime of your login session (no
+password required while login session is alive).
+
+%\noindent \textbf{Comment:} If step 3 fails, then you can try commenting out all of the lines in .bashrc on Rackham by
+%logging in and entering "nano .bashrc" and commenting out the lines by inserting a # in the
+%beginning of every non-empty line. When the installation is done, you can remove those comments.
+%This just prevents that the ssh-copy-id script runs into issues.
+
+\textbf{Result:} Now, you should be able to log in to the Linux servers without entering any password by simply entering \texttt{ssh <username>@<domain>.it.uu.se} in the terminal and pressing enter. Moreover, using this key pair, you can also use password-less \href{https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account}{Github push and pull}. This also works for UPPMAX, and generally most Unix-based machines (including MacOS).
+
+\section{Part 2 - Developing on Rackham from Visual Studio Code locally}
+\begin{enumerate}
+\item Download and install Visual Studio Code.
+\item The extension “Remote - SSH” should be pre-installed, but to ensure that this is the case, press
+\texttt{Cmd+Shift+X} or \texttt{Ctrl+Shift+X} in order to open the extensions pane. Enter “Remote - SSH” in the search box, and
+ensure that it is there. Otherwise, simply install it by pressing the “install” button.
+\item Press \texttt{Cmd/Ctrl+Shift+P}, write “Remote-SSH: Connect to Host” in the search box, and press enter.
+\item Click “+Add New SSH Host”, type “ssh \texttt{<username>@<domain>.it.uu.se}”, and press enter.
+\end{enumerate}
+
+\textbf{Comment:} You should not need to enter the password if you followed the steps of part 1. If you have
+to enter the password then do it and check if it works automatically afterwards.
+
+\textbf{Result:} You should now be able to connect to the server and develop there using the integrated
+terminal window in Visual Studio Code. The editor will allow you to open/read/edit files stored on
+the remote server. You can also open files using the “Open Folder” button. That
+way, you can navigate the file system on Rackham as well as test, build, and debug the code on that
+system. 
+
+\section{Acknowledgements}
+These instructions are a mixture of a rewritten version of an \href{https://stackoverflow.com/a/69970152/754562}{answer on Stack-overflow} and feedback from Chang Hyun, which greatly reduced the complexity of the instructions and added further detail. Moreover, Chang also did the most of the typesetting of these instructions. Thank you, Chang!
+
+\end{document}
